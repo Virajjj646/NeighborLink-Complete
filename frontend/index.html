@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>NeighborLink - Join Your Community</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-container": "#1a1f36",
+            "secondary": "#006b58",
+            "surface-variant": "#e0e3e6",
+            "surface": "#f7f9fc",
+            "surface-container": "#eceef1",
+            "on-primary-container": "#8286a2",
+            "on-primary": "#ffffff",
+            "background": "#f7f9fc",
+            "on-surface": "#191c1e",
+            "surface-container-high": "#e6e8eb",
+            "primary": "#03071d",
+            "surface-container-low": "#f2f4f7",
+            "on-secondary-container": "#00725e",
+            "on-background": "#191c1e",
+            "on-secondary": "#ffffff",
+            "on-surface-variant": "#46464d",
+            "outline": "#77767e",
+            "on-error": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-highest": "#e0e3e6",
+            "secondary-container": "#5ffbd6",
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"
+          },
+          fontFamily: {
+            headline: ["Inter"], body: ["Inter"], label: ["Inter"]
+          }
+        }
+      }
+    }
+  </script>
+  <script src="config.js"></script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .signature-texture {
+      background: radial-gradient(circle at 45% 45%, #1a1f36 0%, #03071d 100%);
+    }
+    .nl-alert {
+      display: none;
+      padding: 0.65rem 1rem;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+    .nl-alert.show { display: block; }
+    .nl-alert-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .nl-alert-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased min-h-screen flex items-center justify-center p-6 relative overflow-y-auto">
+
+  <!-- Background Blobs -->
+  <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px] pointer-events-none"></div>
+  <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary-container/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+  <main class="w-full max-w-md z-10">
+
+    <!-- Brand Header -->
+    <div class="flex flex-col items-center mb-10">
+      <div class="mb-4 flex items-center justify-center w-14 h-14 rounded-2xl signature-texture shadow-xl">
+        <span class="material-symbols-outlined text-white text-3xl" style="font-variation-settings: 'FILL' 1;">handshake</span>
+      </div>
+      <h1 class="text-3xl font-black tracking-tight text-primary">NeighborLink</h1>
+      <p class="text-on-surface-variant text-sm mt-2 font-medium tracking-wide">THE MODERN COMMONS</p>
+    </div>
+
+    <!-- Auth Card -->
+    <div class="bg-surface-container-lowest rounded-2xl p-1 shadow-[0_8px_24px_rgba(25,28,30,0.06)] overflow-hidden">
+
+      <!-- Tabs -->
+      <div class="flex p-1 bg-surface-container-low rounded-t-2xl">
+        <button id="tab-login" onclick="switchTab('login')"
+          class="flex-1 py-3 px-4 text-sm font-bold rounded-xl transition-all duration-200 bg-surface-container-lowest text-primary shadow-sm">
+          Login
+        </button>
+        <button id="tab-register" onclick="switchTab('register')"
+          class="flex-1 py-3 px-4 text-sm font-semibold rounded-xl transition-all duration-200 text-on-surface-variant hover:text-primary">
+          Register
+        </button>
+      </div>
+
+      <div class="p-8">
+
+        <!-- LOGIN PANEL -->
+        <div id="panel-login" class="space-y-5">
+          <div id="alert-login" class="nl-alert"></div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-bold tracking-widest text-secondary uppercase px-1">Username</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">person</span>
+              <input id="login-username" type="text" placeholder="your_username"
+                class="w-full pl-12 pr-4 py-3.5 bg-surface-container-high border-none rounded-xl focus:bg-surface-container-lowest focus:ring-0 transition-all border-b-2 border-transparent focus:border-secondary text-sm placeholder:text-on-surface-variant/50"/>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between items-center px-1">
+              <label class="block text-xs font-bold tracking-widest text-secondary uppercase">Password</label>
+              <a class="text-[10px] font-bold text-on-surface-variant hover:text-secondary uppercase tracking-tighter" href="#">Forgot?</a>
+            </div>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">lock</span>
+              <input id="login-password" type="password" placeholder="••••••••"
+                class="w-full pl-12 pr-4 py-3.5 bg-surface-container-high border-none rounded-xl focus:bg-surface-container-lowest focus:ring-0 transition-all border-b-2 border-transparent focus:border-secondary text-sm placeholder:text-on-surface-variant/50"/>
+            </div>
+          </div>
+
+          <button id="btn-login" onclick="handleLogin()"
+            class="w-full py-4 signature-texture text-white font-bold rounded-xl shadow-lg hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group">
+            <span>Sign In</span>
+            <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          </button>
+
+          <!-- Social logins -->
+          <div class="pt-2 flex flex-col items-center gap-4">
+            <div class="flex items-center gap-2 w-full">
+              <div class="h-[1px] flex-1 bg-surface-container-highest"></div>
+              <span class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Or connect with</span>
+              <div class="h-[1px] flex-1 bg-surface-container-highest"></div>
+            </div>
+            <div class="flex gap-3 w-full">
+              <button class="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-surface-container-low hover:bg-surface-container-high rounded-xl transition-colors text-sm font-semibold" type="button">
+                <img alt="Google" class="w-4 h-4" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrvPyOg5oMf0jW7f3_W2-YWXXOICu6IjV69D8z1i6VGm7jit0X-Kpn90rIs1aulW2TJdUwlMq-oVNm9S3kF7QQVi8_7uWJyfE7YZYzMV82iCFcpfro2av510B2QgRfud0mRxingteXlHgereZwAZZalRPwFKc30Nw3QB7BvQFeNZVWWOD7ewPhmUS0KDaWmoB9nwYZLfu8PWNFohodPG0NPhcAiBapT_97T15amJZFfPZwRkuCFnIBFfhouhdt1O3waYpKz3h_iR4z"/>
+                <span>Google</span>
+              </button>
+              <button class="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-surface-container-low hover:bg-surface-container-high rounded-xl transition-colors text-sm font-semibold" type="button">
+                <img alt="Apple" class="w-4 h-4" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc4WUq6rSIpmfaBhQBIKl6kKuNwLGuEkiVbLbrZ2lNO-Lf5Y7PJZdIsh6OXmFX0zRnMPSP4PghE-GMB51MijoM8CE6lnzTln6HuMrMjuJFD-A07j4fHYgxmcz4CEDSo9mIMRffuOi5A-iGdakYK05FOUWo4ZALlyP0by70N6w2IzdRhBKi0vSfEyCB8Y16yzeJZrLJYBzms8DwvIzC5yg1_5A-FoZwm-CNcybskFpKAuQXAxHagMdZ2m6AIgPw_apvk48-FFWW7NFS"/>
+                <span>Apple</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- REGISTER PANEL -->
+        <div id="panel-register" class="space-y-5 hidden">
+          <div id="alert-register" class="nl-alert"></div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-bold tracking-widest text-secondary uppercase px-1">Full Name</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">badge</span>
+              <input id="reg-name" type="text" placeholder="Your full name"
+                class="w-full pl-12 pr-4 py-3.5 bg-surface-container-high border-none rounded-xl focus:bg-surface-container-lowest focus:ring-0 transition-all border-b-2 border-transparent focus:border-secondary text-sm placeholder:text-on-surface-variant/50"/>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-bold tracking-widest text-secondary uppercase px-1">Username</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">person</span>
+              <input id="reg-username" type="text" placeholder="Choose a username"
+                class="w-full pl-12 pr-4 py-3.5 bg-surface-container-high border-none rounded-xl focus:bg-surface-container-lowest focus:ring-0 transition-all border-b-2 border-transparent focus:border-secondary text-sm placeholder:text-on-surface-variant/50"/>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-bold tracking-widest text-secondary uppercase px-1">Email Address</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">mail</span>
+              <input id="reg-email" type="email" placeholder="name@example.com"
+                class="w-full pl-12 pr-4 py-3.5 bg-surface-container-high border-none rounded-xl focus:bg-surface-container-lowest focus:ring-0 transition-all border-b-2 border-transparent focus:border-secondary text-sm placeholder:text-on-surface-variant/50"/>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-bold tracking-widest text-secondary uppercase px-1">Password</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">lock</span>
+              <input id="reg-password" type="password" placeholder="Create a password"
+                class="w-full pl-12 pr-4 py-3.5 bg-surface-container-high border-none rounded-xl focus:bg-surface-container-lowest focus:ring-0 transition-all border-b-2 border-transparent focus:border-secondary text-sm placeholder:text-on-surface-variant/50"/>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-bold tracking-widest text-secondary uppercase px-1">Phone <span class="normal-case font-normal text-on-surface-variant">(optional)</span></label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">phone</span>
+              <input id="reg-phone" type="tel" placeholder="+91 xxxxx xxxxx"
+                class="w-full pl-12 pr-4 py-3.5 bg-surface-container-high border-none rounded-xl focus:bg-surface-container-lowest focus:ring-0 transition-all border-b-2 border-transparent focus:border-secondary text-sm placeholder:text-on-surface-variant/50"/>
+            </div>
+          </div>
+
+          <button id="btn-register" onclick="handleRegister()"
+            class="w-full py-4 signature-texture text-white font-bold rounded-xl shadow-lg hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group">
+            <span>Create Account</span>
+            <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Trust Badges -->
+    <div class="mt-6 grid grid-cols-2 gap-4">
+      <div class="bg-secondary-container/30 rounded-2xl p-4 flex flex-col items-center text-center">
+        <span class="material-symbols-outlined text-on-secondary-container mb-2">verified_user</span>
+        <p class="text-[10px] font-bold text-on-secondary-container tracking-widest uppercase mb-1">Secure</p>
+        <p class="text-[10px] text-on-secondary-container opacity-80 leading-tight">Bank-grade community verification</p>
+      </div>
+      <div class="bg-surface-container-high rounded-2xl p-4 flex flex-col items-center text-center">
+        <span class="material-symbols-outlined text-on-surface-variant mb-2">location_on</span>
+        <p class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase mb-1">Local</p>
+        <p class="text-[10px] text-on-surface-variant opacity-80 leading-tight">Exclusively for your neighborhood</p>
+      </div>
+    </div>
+
+    <!-- Legal -->
+    <p class="mt-8 text-center text-[10px] text-on-surface-variant tracking-wider uppercase opacity-50">
+      By continuing, you agree to our <a class="underline hover:text-secondary" href="#">Terms of Service</a> and <a class="underline hover:text-secondary" href="#">Privacy Policy</a>
+    </p>
+
+  </main>
+
+  <!-- Background image -->
+  <div class="fixed inset-0 -z-20">
+    <img alt="Neighborhood community" class="w-full h-full object-cover opacity-10"
+      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAo0sgaPYVpRmvjANtHevEva2lvccWBQUV9Zsnw8hEUBVh-G_YvkzsD9KfNorDBj4bmvgoVboFr7CJBveLC4B_-NQL-FBuaIAcFMzAj4NUDXw-ugYr_cKm-GMDPOmM3oWaA8Y20nohZWL5b9-afOYPMD7Sr9AqC_ys4pbnS1Qac_TRHrsxhNww80giEHy035miM8euNKZQhmMniOQxgtvmSl4mhdxGkX4OE8BIEIw98pfna-ZvVT6BZHVWia75AICPk_vRsp6k1BZ7t"/>
+  </div>
+
+  <!-- utils.js must be in the same folder as this file -->
+  <script src="utils.js"></script>
+<script src="config.js"></script>
+<script>
+  // Redirect if already logged in
+  if (Auth.get()) window.location.href = 'dashboard.html';
+
+  // ── Tab switcher ──────────────────────────────────────────
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('panel-login').classList.toggle('hidden', !isLogin);
+    document.getElementById('panel-register').classList.toggle('hidden', isLogin);
+
+    const loginBtn    = document.getElementById('tab-login');
+    const registerBtn = document.getElementById('tab-register');
+
+    if (isLogin) {
+      loginBtn.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+      loginBtn.classList.remove('text-on-surface-variant');
+      registerBtn.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+      registerBtn.classList.add('text-on-surface-variant');
+    } else {
+      registerBtn.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+      registerBtn.classList.remove('text-on-surface-variant');
+      loginBtn.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+      loginBtn.classList.add('text-on-surface-variant');
+    }
+  }
+
+  // ── Alert helper ──────────────────────────────────────────
+  function showNlAlert(elId, msg, type = 'success') {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.textContent = msg;
+    el.className = `nl-alert nl-alert-${type} show`;
+    setTimeout(() => el.classList.remove('show'), 5000);
+  }
+
+  // ── Spinner helper ────────────────────────────────────────
+  function setLoading(btn, loading) {
+    if (loading) {
+      btn.dataset.orig = btn.innerHTML;
+      btn.innerHTML = `<svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+      </svg> Loading…`;
+      btn.disabled = true;
+    } else {
+      btn.innerHTML = btn.dataset.orig;
+      btn.disabled = false;
+    }
+  }
+
+  // ── LOGIN ─────────────────────────────────────────────────
+  // API: POST http://localhost:8080/api/users/login
+  // Body: { email, password }
+  async function handleLogin() {
+    const email    = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    if (!email || !password)
+      return showNlAlert('alert-login', 'Please fill in all fields.', 'error');
+
+    const btn = document.getElementById('btn-login');
+    setLoading(btn, true);
+
+    try {
+      const res  = await fetch(`${API_BASE}/users/login`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || 'Login failed');
+
+      // Save user to localStorage
+      Auth.save({
+        userId:     data.userId,
+        username:   data.username,
+        socId:      data.socId,
+        trustScore: data.trustScore,
+        flatNo:     data.flatNo
+      });
+
+      window.location.href = 'dashboard.html';
+
+    } catch (err) {
+      showNlAlert('alert-login', err.message || 'Login failed. Check your credentials.', 'error');
+    } finally {
+      setLoading(btn, false);
+    }
+  }
+
+  // ── REGISTER ──────────────────────────────────────────────
+  // API: POST http://localhost:8080/api/users/register
+  // Body: { socId, username, email, flatNo, password }
+  async function handleRegister() {
+    const username = document.getElementById('reg-username').value.trim();
+    const email    = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const flatNo   = document.getElementById('reg-phone').value.trim(); // reg-phone = flat number field
+    const socId    = document.getElementById('reg-society')
+                     ? parseInt(document.getElementById('reg-society').value) : 1;
+
+    if (!username || !email || !password || !flatNo)
+      return showNlAlert('alert-register', 'Please fill in all required fields.', 'error');
+
+    const btn = document.getElementById('btn-register');
+    setLoading(btn, true);
+
+    try {
+      const res  = await fetch(`${API_BASE}/users/register`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ socId, username, email, flatNo, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || 'Registration failed');
+
+      showNlAlert('alert-register', 'Registered successfully! Please login.', 'success');
+      setTimeout(() => switchTab('login'), 1500);
+
+    } catch (err) {
+      showNlAlert('alert-register', err.message || 'Registration failed. Try again.', 'error');
+    } finally {
+      setLoading(btn, false);
+    }
+  }
+
+  // ── Load societies into dropdown (if it exists) ───────────
+  // API: GET http://localhost:8080/api/societies
+  async function loadSocieties() {
+    const sel = document.getElementById('reg-society');
+    if (!sel) return;
+    try {
+      const res  = await fetch(`${API_BASE}/societies`);
+      const data = await res.json();
+      sel.innerHTML = data.map(s =>
+        `<option value="${s.socId}">${s.socName} — ${s.city}</option>`
+      ).join('');
+    } catch (e) {
+      console.warn('Could not load societies', e);
+    }
+  }
+  loadSocieties();
+
+  // ── Enter key support ─────────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const loginVisible = !document.getElementById('panel-login').classList.contains('hidden');
+    loginVisible ? handleLogin() : handleRegister();
+  });
+</script>
+</body>
+</html>

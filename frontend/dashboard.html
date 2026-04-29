@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>NeighborLink — Dashboard</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-container": "#1a1f36",
+            "secondary": "#006b58",
+            "surface-variant": "#e0e3e6",
+            "surface": "#f7f9fc",
+            "surface-container": "#eceef1",
+            "on-primary-container": "#8286a2",
+            "on-primary": "#ffffff",
+            "background": "#f7f9fc",
+            "on-surface": "#191c1e",
+            "surface-container-high": "#e6e8eb",
+            "inverse-surface": "#2d3133",
+            "primary": "#03071d",
+            "surface-container-low": "#f2f4f7",
+            "on-secondary-container": "#00725e",
+            "outline-variant": "#c7c5ce",
+            "on-background": "#191c1e",
+            "on-secondary": "#ffffff",
+            "on-surface-variant": "#46464d",
+            "outline": "#77767e",
+            "on-error": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-highest": "#e0e3e6",
+            "secondary-container": "#5ffbd6",
+            "primary-fixed": "#dde1ff",
+            "on-primary-fixed-variant": "#41455f",
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"
+          }
+        }
+      }
+    }
+  </script>
+  <script src="config.js"></script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body { font-family: 'Inter', sans-serif; background-color: #f7f9fc; }
+    .signature-gradient { background: radial-gradient(circle at 45% 45%, #1a1f36 0%, #03071d 100%); }
+    .glass-header { background-color: rgba(255,255,255,0.85); backdrop-filter: blur(24px); }
+  </style>
+</head>
+<body class="bg-surface text-on-surface overflow-y-auto">
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 w-full z-50 glass-header border-b border-outline-variant/20">
+    <div class="flex justify-between items-center px-8 h-16 w-full max-w-7xl mx-auto">
+      <div class="flex items-center gap-8">
+        <span class="text-xl font-black tracking-tight text-primary">NeighborLink</span>
+        <div class="hidden md:flex items-center gap-6">
+          <a href="browse_listings.html"         class="text-slate-500 hover:text-primary transition-colors text-sm font-medium">Browse</a>
+          <a href="my_rentals.html"     class="text-slate-500 hover:text-primary transition-colors text-sm font-medium">Rentals</a>
+          <a href="dashboard.html"      class="text-teal-600 font-bold border-b-2 border-teal-600 text-sm py-1">Activity</a>
+          <a href="dbms_lab.html"       class="text-slate-500 hover:text-primary transition-colors text-sm font-medium">🧪 DBMS Lab</a>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="relative hidden sm:block">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+          <input class="bg-surface-container-high border-none rounded-full pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-secondary/20 transition-all" placeholder="Search items..." type="text"/>
+        </div>
+        <a href="create_listing.html" class="signature-gradient text-white px-5 py-2 rounded-xl text-sm font-bold shadow-lg active:scale-95 duration-100">
+          Post Item
+        </a>
+        <div id="nav-avatar" class="w-10 h-10 rounded-full signature-gradient flex items-center justify-center text-white font-bold text-sm cursor-pointer" onclick="logout()"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="pt-24 pb-12 px-6 max-w-7xl mx-auto space-y-10">
+
+    <!-- Welcome Header -->
+    <header class="relative overflow-hidden p-10 rounded-[24px] bg-white border border-outline-variant/15 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div class="relative z-10">
+        <span class="text-secondary font-bold tracking-[0.05em] uppercase text-xs mb-2 block">Dashboard Overview</span>
+        <h1 class="text-4xl font-extrabold text-on-surface tracking-tight" id="welcome-msg">Welcome back! 🏘️</h1>
+        <p class="text-on-surface-variant mt-2 max-w-md">Your neighborhood is buzzing today. You have 3 new rental inquiries and 2 items ready for pickup.</p>
+      </div>
+      <div class="flex gap-3">
+        <a href="browse_listings.html" class="bg-surface-container-high text-on-surface px-6 py-3 rounded-xl font-bold text-sm hover:bg-surface-container-highest transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">explore</span> Browse
+        </a>
+        <a href="my_rentals.html" class="bg-surface-container-high text-on-surface px-6 py-3 rounded-xl font-bold text-sm hover:bg-surface-container-highest transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">receipt_long</span> My Rentals
+        </a>
+        <a href="create_listing.html" class="signature-gradient text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:opacity-90 transition-opacity">
+          <span class="material-symbols-outlined text-lg">add_circle</span> Add Listing
+        </a>
+      </div>
+    </header>
+
+    <!-- Stat Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <!-- Total Users -->
+      <div class="bg-white p-8 rounded-xl border border-outline-variant/15 hover:border-secondary/20 transition-all duration-300">
+        <div class="flex justify-between items-start mb-4">
+          <div class="p-3 bg-primary-container rounded-lg">
+            <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">group</span>
+          </div>
+          <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
+        </div>
+        <p class="text-on-surface-variant text-sm font-medium">Total Users</p>
+        <p class="text-3xl font-black text-on-surface mt-1" id="stat-users">—</p>
+      </div>
+      <!-- My Total Rentals -->
+      <div class="bg-white p-8 rounded-xl border border-outline-variant/15 hover:border-secondary/20 transition-all duration-300">
+        <div class="flex justify-between items-start mb-4">
+          <div class="p-3 bg-surface-container rounded-lg">
+            <span class="material-symbols-outlined text-on-surface-variant" style="font-variation-settings: 'FILL' 1;">handshake</span>
+          </div>
+          <span class="text-on-surface-variant text-xs font-medium">This month</span>
+        </div>
+        <p class="text-on-surface-variant text-sm font-medium">My Total Rentals</p>
+        <p class="text-3xl font-black text-on-surface mt-1" id="stat-rentals">—</p>
+      </div>
+      <!-- Trust Score -->
+      <div class="bg-white p-8 rounded-xl border border-outline-variant/15 hover:border-secondary/20 transition-all duration-300">
+        <div class="flex justify-between items-start mb-4">
+          <div class="p-3 bg-secondary-container rounded-lg">
+            <span class="material-symbols-outlined text-on-secondary-container" style="font-variation-settings: 'FILL' 1;">verified</span>
+          </div>
+        </div>
+        <p class="text-on-surface-variant text-sm font-medium">My Trust Score</p>
+        <div class="flex items-center gap-1 mt-1">
+          <p class="text-3xl font-black text-on-surface mr-2" id="stat-trust">—</p>
+          <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+          <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+          <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+          <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+          <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star_half</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <!-- Recent Activity Table -->
+      <section class="lg:col-span-8 bg-white rounded-xl border border-outline-variant/15 overflow-hidden">
+        <div class="p-6 border-b border-surface-container flex justify-between items-center">
+          <h2 class="text-lg font-extrabold text-on-surface">Recent Activity</h2>
+          <a href="my_rentals.html" class="text-secondary font-bold text-sm hover:underline">View All</a>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-surface-container-low">
+                <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Item</th>
+                <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">User</th>
+                <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Status</th>
+                <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Date</th>
+              </tr>
+            </thead>
+            <tbody id="activity-tbody" class="divide-y divide-surface-container">
+              <!-- Populated by JS -->
+              <tr><td colspan="4" class="px-6 py-8 text-center text-on-surface-variant text-sm">Loading activity...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Sidebar -->
+      <aside class="lg:col-span-4 space-y-6">
+        <!-- Community Trust -->
+        <div class="bg-primary-container p-8 rounded-xl text-white relative overflow-hidden group">
+          <div class="relative z-10">
+            <h3 class="text-xl font-bold mb-2">Community Trust</h3>
+            <p class="text-on-primary-container text-sm leading-relaxed mb-6">You're in the top 5% of neighbors in Northwood Heights. Keep sharing to maintain your status!</p>
+            <div class="flex -space-x-3 mb-6">
+              <img class="w-10 h-10 rounded-full border-2 border-primary-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTlsCWXatL31Ifw986fs0sPAdwangaqx41V06yFtONawvU9hTU4XfxwIZHfh69os5HxoTnuqCquPW1CsSWs0RSWnkOd-RiFE_o8MXuYz-tSbEoItnmL6fhuJm3YpyqjTeJJoNR6tIGK4spkRxLAwEHVm-m72M1-Z3hLMqUZhAduNZ6Xai-9lhsGZ2jtqu4h7MhEQv67aGwHmj5IHt_hY8Lg7n9PO7FX9nUzaCniAnqcFJFrznG91VMFUoTEmnsx12ssPfH-uGjyIl7" alt="neighbor"/>
+              <img class="w-10 h-10 rounded-full border-2 border-primary-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwE-z4VTnWROJmwg_RQscU3GeoDEjosasaDKWniCOI5FsDlM4JhGFu7zswmMPUfV7bbrysJ3gZKrdf70Qzhq4mRbPChhK4suHd08bPGF8tnn51iKk9sRVYA7ki_jVrY15MyhUHu4nh_jr84MQ3D45rTq0vqvMS-oGtfh7-YLMmRGPHO_WvKDaAInXE-pDndZbLWKKt196-xdyABhPfV80JHjil-quyQd37aVrZQ4ikezJA0PPBV8apYxb4i49a9bgG6sUt4lmg3DPv" alt="neighbor"/>
+              <img class="w-10 h-10 rounded-full border-2 border-primary-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4iJ0uPdoonEv-XxbPRFwLmA6BTZeysJ-RX0EtZpHmPb90eNZkmqi9fKObx9Gp7zmiLXdGdkZC0eRXD74y2b5drFI4IUrWZlp1Av_1sCl596swJnumMoLa-n6k8jolJrGDCAL9mLLsq7h8pHm16S0r8MCwZKJylHwCDL9suDOkeHXxeblEpHfxfILExa5Pl2m_JvaevLFt7tgXA2Vctx4H5_UYc9lO1COk_51NVPkekV-XrSMuvlKgOtZYd6KkyppI_zDXRy3NqTzx" alt="neighbor"/>
+              <div class="w-10 h-10 rounded-full border-2 border-primary-container bg-secondary flex items-center justify-center text-[10px] font-bold">+12</div>
+            </div>
+            <button class="w-full py-3 rounded-lg border border-on-primary-container/30 text-sm font-bold hover:bg-white hover:text-primary transition-all">
+              View Neighborhood Map
+            </button>
+          </div>
+          <div class="absolute bottom-0 right-0 w-32 h-32 signature-gradient blur-2xl opacity-50 group-hover:opacity-80 transition-opacity"></div>
+        </div>
+
+        <!-- Pro Tip -->
+        <div class="bg-secondary-container p-6 rounded-xl border border-secondary/10">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="material-symbols-outlined text-on-secondary-container">lightbulb</span>
+            <span class="text-xs font-black uppercase text-on-secondary-container tracking-wider">Pro Tip</span>
+          </div>
+          <p class="text-on-secondary-container text-sm font-medium leading-snug">
+            Listing your power tools can earn you an average of ₹3,500/weekend. Neighbors are currently searching for "pressure washers".
+          </p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Chat FAB -->
+  <button class="fixed bottom-8 right-8 signature-gradient text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl shadow-primary/40 hover:scale-110 active:scale-95 transition-all z-50">
+    <span class="material-symbols-outlined text-2xl">chat</span>
+  </button>
+
+  <script src="utils.js"></script>
+  <script>
+    // Guard: redirect to login if not authenticated
+    const user = Auth.require();
+
+    // Set welcome message and avatar initials
+    if (user) {
+      document.getElementById('welcome-msg').textContent = `Welcome back, ${user.username}! 🏘️`;
+      document.getElementById('nav-avatar').textContent = user.username.slice(0, 2).toUpperCase();
+    }
+
+    // Status badge helper
+    function badge(status) {
+      const map = {
+        COMPLETED: 'bg-secondary-container text-on-secondary-container',
+        ACTIVE:    'bg-secondary-container text-on-secondary-container',
+        PENDING:   'bg-primary-fixed text-on-primary-fixed-variant',
+        CANCELLED: 'bg-red-100 text-red-800',
+      };
+      return `<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase ${map[status] || 'bg-surface-container text-on-surface-variant'}">${status}</span>`;
+    }
+
+    // Format relative time
+    function relTime(dateStr) {
+      if (!dateStr) return '—';
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const h = Math.floor(diff / 3600000);
+      if (h < 1) return 'Just now';
+      if (h < 24) return `${h}h ago`;
+      return `${Math.floor(h / 24)}d ago`;
+    }
+
+    // Load dashboard stats & recent activity from API
+    async function loadDashboard() {
+  // ── Stats ──────────────────────────────────────────────────
+      try {
+        // GET /api/users/count  →  SELECT COUNT(*) FROM USERS
+        const countRes  = await fetch(`${API_BASE}/users/count`);
+        const countData = await countRes.json();
+
+        // GET /api/users/{id}/total-rentals  →  SELECT total_rentals_by_user(id) [FUNCTION]
+        const rentRes   = await fetch(`${API_BASE}/users/${user.userId}/total-rentals`);
+        const rentData  = await rentRes.json();
+
+        // GET /api/users/{id}/trust-score  →  AVG(rating) aggregation
+        const trustRes  = await fetch(`${API_BASE}/users/${user.userId}/trust-score`);
+        const trustData = await trustRes.json();
+
+        document.getElementById('stat-users').textContent   = countData.count       ?? '—';
+        document.getElementById('stat-rentals').textContent = rentData.totalRentals  ?? '—';
+        document.getElementById('stat-trust').textContent   = 
+          trustData.trust_score 
+            ? parseFloat(trustData.trust_score).toFixed(1) 
+            : (user.trustScore ?? '5.0');
+
+      } catch (e) {
+        console.warn('Stats load failed', e);
+        document.getElementById('stat-users').textContent   = '—';
+        document.getElementById('stat-rentals').textContent = '—';
+        document.getElementById('stat-trust').textContent   = user.trustScore ?? '5.0';
+      }
+
+      // ── Recent Activity ────────────────────────────────────────
+      // GET /api/rentals/renter/{id}  →  SELECT * FROM RENTALS WHERE renter_id = ?
+      try {
+        const res     = await fetch(`${API_BASE}/rentals/renter/${user.userId}`);
+        const rentals = await res.json();
+        const tbody   = document.getElementById('activity-tbody');
+
+        if (!rentals.length) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="4" class="px-6 py-8 text-center text-on-surface-variant text-sm">
+                No activity yet. 
+                <a href="browse_listings.html" class="text-secondary font-bold">Browse items</a> 
+                to get started!
+              </td>
+            </tr>`;
+          return;
+        }
+
+        // GET /api/rentals/detailed  →  MULTI JOIN query
+        const detailRes  = await fetch(`${API_BASE}/rentals/detailed`);
+        const detailed   = await detailRes.json();
+
+        // Filter to only this user's rentals
+        const myRentals  = detailed
+          .filter(r => r.renter === user.username)
+          .slice(0, 5);
+
+        tbody.innerHTML = myRentals.map(r => `
+          <tr class="hover:bg-surface-container-low/50 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center">
+                  <span class="material-symbols-outlined text-on-surface-variant text-sm">inventory_2</span>
+                </div>
+                <span class="text-sm font-bold text-on-surface">${r.title ?? 'Item'}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-on-surface-variant">${r.owner ?? '—'}</td>
+            <td class="px-6 py-4">${badge(r.status)}</td>
+            <td class="px-6 py-4 text-sm text-on-surface-variant">${r.start_date ?? '—'}</td>
+          </tr>
+        `).join('');
+
+      } catch (e) {
+        console.warn('Activity load failed', e);
+        // Keep Stitch demo data as fallback — already in your HTML
+      }
+    }
+
+    loadDashboard();
+
+    function logout() {
+      Auth.clear();
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

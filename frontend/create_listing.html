@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>List Your Item — NeighborLink</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-container": "#1a1f36", "secondary": "#006b58",
+            "surface-variant": "#e0e3e6", "surface": "#f7f9fc",
+            "surface-container": "#eceef1", "on-primary-container": "#8286a2",
+            "on-primary": "#ffffff", "background": "#f7f9fc",
+            "on-surface": "#191c1e", "surface-container-high": "#e6e8eb",
+            "primary": "#03071d", "surface-container-low": "#f2f4f7",
+            "on-secondary-container": "#00725e", "outline-variant": "#c7c5ce",
+            "on-background": "#191c1e", "on-secondary": "#ffffff",
+            "on-surface-variant": "#46464d", "outline": "#77767e",
+            "surface-container-lowest": "#ffffff", "surface-container-highest": "#e0e3e6",
+            "secondary-container": "#5ffbd6", "secondary-fixed-dim": "#38debb",
+            "primary-fixed": "#dde1ff", "on-primary-fixed-variant": "#41455f",
+          },
+          borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", "2xl": "1rem", full: "9999px" },
+          fontFamily: { headline: ["Inter"], body: ["Inter"], label: ["Inter"] }
+        }
+      }
+    }
+  </script>
+  <script src="config.js"></script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .signature-gradient { background: radial-gradient(circle at 45% 45%, #1a1f36 0%, #03071d 100%); }
+    .glass-nav { background: rgba(255,255,255,0.85); backdrop-filter: blur(24px); }
+
+    /* Image upload drag state */
+    .upload-zone.dragover { background: #eceef1; border-color: #006b58; }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .animate-slide-up { animation: slideUp 0.3s ease forwards; }
+  </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased overflow-y-auto">
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/20">
+    <div class="flex justify-between items-center px-8 h-16 w-full max-w-7xl mx-auto">
+      <div class="flex items-center gap-8">
+        <a href="dashboard.html" class="text-xl font-black tracking-tight text-slate-900">NeighborLink</a>
+        <div class="hidden md:flex items-center gap-6">
+          <a href="browse_listings.html"     class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium">Browse</a>
+          <a href="my_rentals.html" class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium">Rentals</a>
+          <a href="dashboard.html"  class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium">Activity</a>
+          <a href="dbms_lab.html"   class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium">🧪 DBMS Lab</a>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="create_listing.html" class="bg-secondary text-white px-5 py-2 rounded-xl text-sm font-bold active:scale-95 transition-all duration-100">Post Item</a>
+        <div id="nav-avatar" onclick="logout()" class="w-8 h-8 rounded-full signature-gradient flex items-center justify-center text-white font-bold text-xs cursor-pointer"></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="pt-32 pb-24 px-6 max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+
+      <!-- Left: Editorial context -->
+      <div class="lg:col-span-5 space-y-8">
+        <div>
+          <span class="text-xs uppercase tracking-wider font-bold text-secondary mb-3 block">Community Economy</span>
+          <h1 class="text-5xl font-black tracking-tighter leading-tight text-primary">
+            Share your <br/> surplus with <br/> the neighborhood.
+          </h1>
+        </div>
+        <p class="text-lg text-on-surface-variant leading-relaxed max-w-md">
+          From power tools to professional skills, your idle assets can power local projects. Set your own terms, earn extra income, and build trust.
+        </p>
+        <div class="bg-surface-container-low rounded-2xl p-8 relative overflow-hidden">
+          <div class="relative z-10">
+            <span class="material-symbols-outlined text-secondary text-4xl mb-4" style="font-variation-settings:'FILL' 1;">verified_user</span>
+            <h3 class="text-xl font-bold text-primary mb-2">Secure Link Protection</h3>
+            <p class="text-sm text-on-surface-variant">Every rental is covered by our ₹1,25,000 Neighborhood Guarantee and verified identity checks.</p>
+          </div>
+          <div class="absolute -right-12 -bottom-12 opacity-10">
+            <span class="material-symbols-outlined text-[160px]">shield</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Form card -->
+      <div class="lg:col-span-7">
+        <div class="bg-surface-container-lowest rounded-2xl p-8 lg:p-12 shadow-[0_8px_24px_rgba(25,28,30,0.06)]">
+          <div class="mb-10">
+            <h2 class="text-3xl font-extrabold tracking-tight text-primary mb-2">List Your Item or Skill</h2>
+            <p class="text-on-surface-variant">Fill in the details below to start earning.</p>
+          </div>
+
+          <!-- Alert -->
+          <div id="form-alert" class="hidden mb-6 p-4 rounded-xl text-sm font-medium"></div>
+
+          <div class="space-y-8">
+
+            <!-- Image Upload -->
+            <div>
+              <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant px-1 block mb-2">Photos</label>
+              <div id="upload-zone"
+                class="upload-zone group relative aspect-[21/9] w-full rounded-xl overflow-hidden bg-surface-container-high flex flex-col items-center justify-center border-2 border-dashed border-outline-variant/40 hover:bg-surface-container transition-colors cursor-pointer"
+                onclick="document.getElementById('file-input').click()"
+                ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+                <input id="file-input" type="file" accept="image/*" class="hidden" onchange="onFileSelect(event)"/>
+                <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-2" id="upload-icon">add_a_photo</span>
+                <span class="text-sm font-medium text-on-surface-variant" id="upload-label">Click or drag to upload high-quality photos</span>
+                <img id="preview-img" class="absolute inset-0 w-full h-full object-cover hidden" alt="preview"/>
+              </div>
+            </div>
+
+            <!-- Title -->
+            <div class="space-y-2">
+              <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant px-1">Title</label>
+              <input id="field-name" type="text"
+                class="w-full bg-surface-container-high border-none rounded-xl px-6 py-4 text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:ring-0 transition-all border-b-2 border-transparent focus:border-secondary"
+                placeholder="e.g. Professional Power Washer or Home Baking Lesson"/>
+            </div>
+
+            <!-- Description -->
+            <div class="space-y-2">
+              <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant px-1">Description</label>
+              <textarea id="field-description" rows="4"
+                class="w-full bg-surface-container-high border-none rounded-xl px-6 py-4 text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:ring-0 transition-all border-b-2 border-transparent focus:border-secondary resize-none"
+                placeholder="Tell your neighbors about the condition, availability, or what's included..."></textarea>
+            </div>
+
+            <!-- Category -->
+            <div class="space-y-2">
+              <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant px-1">Category</label>
+              <select id="field-category"
+                class="w-full bg-surface-container-high border-none rounded-xl px-6 py-4 text-on-surface focus:bg-surface-container-lowest focus:ring-0 transition-all border-b-2 border-transparent focus:border-secondary">
+                <option value="">Select a category</option>
+                <option value="Tools">Tools & Equipment</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Sports">Sports & Outdoors</option>
+                <option value="Kitchen">Kitchen & Appliances</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Vehicles">Vehicles</option>
+                <option value="Skills">Skills & Services</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <!-- Price + Value -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-2">
+                <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant px-1">Price Per Day (₹)</label>
+                <div class="relative">
+                  <span class="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-primary">₹</span>
+                  <input id="field-price" type="number" min="0"
+                    class="w-full bg-surface-container-high border-none rounded-xl pl-10 pr-6 py-4 text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:ring-0 transition-all border-b-2 border-transparent focus:border-secondary"
+                    placeholder="0"/>
+                </div>
+              </div>
+              <div class="space-y-2">
+                <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant px-1">Item Value (₹)</label>
+                <div class="relative">
+                  <span class="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-primary">₹</span>
+                  <input id="field-value" type="number" min="0"
+                    class="w-full bg-surface-container-high border-none rounded-xl pl-10 pr-6 py-4 text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:ring-0 transition-all border-b-2 border-transparent focus:border-secondary"
+                    placeholder="Estimated replacement cost"/>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Preview -->
+            <div id="preview-card" class="hidden bg-surface-container-low rounded-2xl p-5 border border-outline-variant/20 animate-slide-up">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-secondary mb-3">Preview</p>
+              <div class="flex gap-4 items-start">
+                <div id="preview-thumb" class="w-16 h-16 rounded-xl bg-surface-container flex items-center justify-center flex-shrink-0">
+                  <span class="material-symbols-outlined text-on-surface-variant">inventory_2</span>
+                </div>
+                <div>
+                  <p class="font-bold text-on-surface" id="preview-name">Your listing title</p>
+                  <p class="text-xs text-on-surface-variant mt-1" id="preview-desc-short"></p>
+                  <div class="flex gap-3 mt-2">
+                    <span class="text-xs font-black text-secondary" id="preview-price"></span>
+                    <span class="text-xs text-on-surface-variant" id="preview-cat"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="pt-4">
+              <button id="btn-submit" onclick="submitListing()"
+                class="signature-gradient w-full py-5 rounded-2xl text-white font-bold text-lg shadow-[0_8px_24px_rgba(3,7,29,0.2)] active:scale-[0.98] transition-transform flex items-center justify-center gap-3">
+                <span>Create Listing</span>
+                <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
+              <p class="text-center text-xs text-on-surface-variant mt-6">
+                By listing, you agree to our <a class="text-secondary font-bold underline" href="#">Community Standards</a> and <a class="text-secondary font-bold underline" href="#">Terms of Service</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trust Bento Section -->
+    <div class="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="bg-surface-container rounded-2xl p-8 flex flex-col gap-4">
+        <div class="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center">
+          <span class="material-symbols-outlined text-on-secondary-container">calendar_month</span>
+        </div>
+        <h4 class="text-xl font-bold text-primary">Flexible Schedule</h4>
+        <p class="text-sm text-on-surface-variant leading-relaxed">You control exactly when your item is available. Block out dates or set recurring windows.</p>
+      </div>
+      <div class="bg-surface-container rounded-2xl p-8 flex flex-col gap-4">
+        <div class="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center">
+          <span class="material-symbols-outlined text-on-secondary-container">payments</span>
+        </div>
+        <h4 class="text-xl font-bold text-primary">Direct Payouts</h4>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Earnings are deposited directly to your bank account 24 hours after a successful rental ends.</p>
+      </div>
+      <div class="bg-surface-container rounded-2xl p-8 flex flex-col gap-4">
+        <div class="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center">
+          <span class="material-symbols-outlined text-on-secondary-container">group</span>
+        </div>
+        <h4 class="text-xl font-bold text-primary">Local Network</h4>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Connect with vetted neighbors within a 5-mile radius. Build community while you earn.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-20 border-t border-surface-container-high bg-surface-container-low py-12 px-8">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+      <div class="text-xl font-black text-primary">NeighborLink</div>
+      <div class="flex gap-12">
+        <div class="flex flex-col gap-2">
+          <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Company</span>
+          <a class="text-sm font-medium hover:text-secondary" href="#">About Us</a>
+          <a class="text-sm font-medium hover:text-secondary" href="#">Trust & Safety</a>
+        </div>
+        <div class="flex flex-col gap-2">
+          <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Support</span>
+          <a class="text-sm font-medium hover:text-secondary" href="#">Help Center</a>
+          <a class="text-sm font-medium hover:text-secondary" href="#">Contact Us</a>
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center cursor-pointer hover:bg-secondary-container transition-colors">
+          <span class="material-symbols-outlined text-on-surface">language</span>
+        </div>
+        <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center cursor-pointer hover:bg-secondary-container transition-colors">
+          <span class="material-symbols-outlined text-on-surface">alternate_email</span>
+        </div>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto mt-12 text-center text-xs text-on-surface-variant opacity-60">
+      © 2024 NeighborLink Marketplace. All rights reserved.
+    </div>
+  </footer>
+
+  <script src="utils.js"></script>
+  <script>
+    const user = Auth.require();
+    if (user) document.getElementById('nav-avatar').textContent = user.username.slice(0,2).toUpperCase();
+
+    // ── Image upload ──────────────────────────────────────────
+    function onDragOver(e)  { e.preventDefault(); document.getElementById('upload-zone').classList.add('dragover'); }
+    function onDragLeave()  { document.getElementById('upload-zone').classList.remove('dragover'); }
+    function onDrop(e)      { e.preventDefault(); onDragLeave(); handleFile(e.dataTransfer.files[0]); }
+    function onFileSelect(e){ handleFile(e.target.files[0]); }
+
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = document.getElementById('preview-img');
+        img.src = e.target.result;
+        img.classList.remove('hidden');
+        document.getElementById('upload-icon').classList.add('hidden');
+        document.getElementById('upload-label').classList.add('hidden');
+        // update preview thumb too
+        const thumb = document.getElementById('preview-thumb');
+        thumb.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover rounded-xl"/>`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ── Live preview ──────────────────────────────────────────
+    function updatePreview() {
+      const name  = document.getElementById('field-name').value.trim();
+      const desc  = document.getElementById('field-description').value.trim();
+      const price = document.getElementById('field-price').value;
+      const cat   = document.getElementById('field-category').value;
+      const card  = document.getElementById('preview-card');
+
+      if (name || price) {
+        card.classList.remove('hidden');
+        document.getElementById('preview-name').textContent       = name || 'Your listing title';
+        document.getElementById('preview-desc-short').textContent = desc ? desc.slice(0, 80) + (desc.length > 80 ? '…' : '') : '';
+        document.getElementById('preview-price').textContent      = price ? `₹${Number(price).toLocaleString('en-IN')}/day` : '';
+        document.getElementById('preview-cat').textContent        = cat || '';
+      } else {
+        card.classList.add('hidden');
+      }
+    }
+
+    ['field-name','field-description','field-price','field-category','field-value'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', updatePreview);
+      document.getElementById(id)?.addEventListener('change', updatePreview);
+    });
+
+    // ── Alert helper ──────────────────────────────────────────
+    function showAlert(msg, type = 'error') {
+      const el = document.getElementById('form-alert');
+      el.textContent = msg;
+      el.className = type === 'success'
+        ? 'mb-6 p-4 rounded-xl text-sm font-medium bg-green-50 text-green-700 border border-green-200'
+        : 'mb-6 p-4 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200';
+      el.classList.remove('hidden');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // ── Submit listing ────────────────────────────────────────
+    async function submitListing() {
+      const title            = document.getElementById('field-name').value.trim();
+      const description      = document.getElementById('field-description').value.trim();
+      const category         = document.getElementById('field-category').value;
+      const pricePerDay      = parseFloat(document.getElementById('field-price').value);
+      const itemValue        = parseFloat(document.getElementById('field-value').value);
+
+      if (!title)       return showAlert('Please enter a title for your listing.');
+      if (!description) return showAlert('Please add a description.');
+      if (!category)    return showAlert('Please select a category.');
+      if (!pricePerDay || pricePerDay <= 0)
+                        return showAlert('Please enter a valid price per day.');
+
+      const btn = document.getElementById('btn-submit');
+      btn.innerHTML = `<svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+      </svg> Creating listing…`;
+      btn.disabled = true;
+
+      try {
+        // POST /api/products → INSERT INTO PRODUCTS(owner_id, title, description, price_per_day, item_value)
+        const res  = await fetch(`${API_BASE}/products`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            ownerId:     user.userId,   // ✅ correct field
+            title:       title,         // ✅ backend expects 'title' not 'name'
+            description: description,
+            pricePerDay: pricePerDay,
+            itemValue:   isNaN(itemValue) ? 0 : itemValue
+          })
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message || 'Failed to create listing');
+
+        showAlert('✅ Listing created successfully! Redirecting to Browse…', 'success');
+        setTimeout(() => window.location.href = 'browse_listings.html', 2000); // ✅ correct filename
+
+      } catch (err) {
+        showAlert(err.message || 'Failed to create listing. Please try again.');
+        btn.innerHTML = `<span>Create Listing</span><span class="material-symbols-outlined">arrow_forward</span>`;
+        btn.disabled  = false;
+      }
+    }
+
+    // Enter key submits
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') submitListing();
+    });
+
+    function logout() { Auth.clear(); window.location.href = 'index.html'; }
+  </script>
+</body>
+</html>

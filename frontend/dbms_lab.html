@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>DBMS Lab — NeighborLink</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-container": "#1a1f36", "secondary": "#006b58",
+            "surface-variant": "#e0e3e6", "surface": "#f7f9fc",
+            "surface-container": "#eceef1", "on-primary-container": "#8286a2",
+            "on-primary": "#ffffff", "background": "#f7f9fc",
+            "on-surface": "#191c1e", "surface-container-high": "#e6e8eb",
+            "primary": "#03071d", "surface-container-low": "#f2f4f7",
+            "on-secondary-container": "#00725e", "outline-variant": "#c7c5ce",
+            "on-background": "#191c1e", "on-secondary": "#ffffff",
+            "on-surface-variant": "#46464d", "outline": "#77767e",
+            "surface-container-lowest": "#ffffff", "surface-container-highest": "#e0e3e6",
+            "secondary-container": "#5ffbd6", "secondary-fixed": "#5ffbd6",
+            "secondary-fixed-dim": "#38debb", "on-tertiary-container": "#9a855e",
+            "primary-fixed": "#dde1ff", "on-primary-fixed-variant": "#41455f",
+            "error-container": "#ffdad6", "on-error-container": "#93000a", "error": "#ba1a1a",
+          },
+          borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+          fontFamily: { headline: ["Inter"], body: ["Inter"], label: ["Inter"] }
+        }
+      }
+    }
+  </script>
+  <script src="config.js"></script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .signature-gradient { background: radial-gradient(circle at 45% 45%, #1a1f36 0%, #03071d 100%); }
+    .glass-panel { background: rgba(255,255,255,0.85); backdrop-filter: blur(24px); }
+
+    /* Output terminal */
+    .terminal { background: #0d1117; color: #c9d1d9; font-family: 'Courier New', monospace; font-size: 0.78rem; line-height: 1.7; }
+    .t-ok   { color: #3fb950; }
+    .t-info { color: #58a6ff; }
+    .t-warn { color: #d29922; }
+    .t-err  { color: #f85149; }
+    .t-dim  { color: #6e7681; }
+
+    /* Sidebar active */
+    .nav-item.active { background: #ccfbf1; color: #006b58; }
+    .nav-item { transition: all 0.15s; }
+    .nav-item:hover { transform: translateX(4px); }
+
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .pulse { animation: pulse-dot 2s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-surface font-body text-on-surface overflow-y-auto">
+
+  <!-- Top Navbar -->
+  <nav class="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl border-b border-outline-variant/20 h-16 flex items-center">
+    <div class="flex justify-between items-center px-8 w-full max-w-full mx-auto">
+      <div class="flex items-center gap-8">
+        <a href="dashboard.html" class="text-xl font-black tracking-tight text-slate-900">NeighborLink</a>
+        <div class="hidden md:flex gap-6 text-sm font-medium">
+          <a href="browse_listings.html"     class="text-slate-500 hover:text-teal-600 transition-colors">Browse</a>
+          <a href="my_rentals.html" class="text-slate-500 hover:text-teal-600 transition-colors">Rentals</a>
+          <a href="dashboard.html"  class="text-slate-500 hover:text-teal-600 transition-colors">Activity</a>
+          <a href="dbms_lab.html"   class="text-teal-600 font-bold border-b-2 border-teal-600 py-1">🧪 DBMS Lab</a>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="create_listing.html" class="px-4 py-2 rounded-lg bg-teal-600 text-white font-bold text-sm active:scale-95 duration-100">Post Item</a>
+        <div id="nav-avatar" onclick="logout()" class="w-8 h-8 rounded-full signature-gradient flex items-center justify-center text-white font-bold text-xs cursor-pointer"></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Right Sidebar -->
+  <aside class="fixed right-0 top-0 h-full w-72 shadow-[-8px_0_24px_rgba(25,28,30,0.06)] z-[60] bg-slate-50 flex flex-col p-6 border-l border-outline-variant/20 pt-20">
+    <div class="mb-8">
+      <h2 class="text-lg font-bold text-slate-900">DBMS Lab</h2>
+      <p class="text-xs text-on-surface-variant font-medium tracking-wide">TRANSACTION SIMULATOR</p>
+    </div>
+    <nav class="flex-1 flex flex-col gap-1">
+      <a onclick="setSection('simulator')"  class="nav-item active cursor-pointer rounded-lg px-4 py-3 flex items-center gap-3"><span class="material-symbols-outlined text-teal-600">terminal</span><span class="text-sm font-medium">Simulator</span></a>
+      <a onclick="setSection('query')"      class="nav-item cursor-pointer text-slate-500 px-4 py-3 hover:bg-slate-100 rounded-lg flex items-center gap-3"><span class="material-symbols-outlined">database</span><span class="text-sm">Query Runner</span></a>
+      <a onclick="setSection('triggers')"   class="nav-item cursor-pointer text-slate-500 px-4 py-3 hover:bg-slate-100 rounded-lg flex items-center gap-3"><span class="material-symbols-outlined">bolt</span><span class="text-sm">Trigger Test</span></a>
+      <a onclick="setSection('locks')"      class="nav-item cursor-pointer text-slate-500 px-4 py-3 hover:bg-slate-100 rounded-lg flex items-center gap-3"><span class="material-symbols-outlined">lock</span><span class="text-sm">Concurrency</span></a>
+      <a onclick="setSection('logs')"       class="nav-item cursor-pointer text-slate-500 px-4 py-3 hover:bg-slate-100 rounded-lg flex items-center gap-3"><span class="material-symbols-outlined">receipt_long</span><span class="text-sm">Logs</span></a>
+    </nav>
+    <!-- DB Status -->
+    <div class="mt-4 p-4 bg-surface-container rounded-xl border border-outline-variant/20">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="w-2 h-2 rounded-full bg-secondary pulse"></span>
+        <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Backend Status</span>
+      </div>
+      <p class="text-xs font-bold text-primary" id="db-status">Checking…</p>
+    </div>
+    <button onclick="executeQuery()" class="mt-4 signature-gradient text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 active:opacity-80 hover:opacity-90 transition-opacity">
+      <span class="material-symbols-outlined">play_arrow</span> Execute Query
+    </button>
+  </aside>
+
+  <!-- Main -->
+  <main class="pt-24 pb-12 pl-8 pr-[300px] min-h-screen">
+
+    <!-- Header -->
+    <header class="mb-10">
+      <span class="text-secondary font-bold text-xs uppercase tracking-widest mb-2 block">System Administration</span>
+      <h1 class="text-4xl font-extrabold tracking-tight text-primary mb-4">Laboratory Control Center</h1>
+      <p class="text-on-surface-variant max-w-2xl leading-relaxed">Execute complex relational workflows for NeighborLink's distributed asset marketplace. Monitor transaction integrity, trigger validations, and concurrency locks in real-time.</p>
+    </header>
+
+    <!-- ══ SECTION: SIMULATOR ══════════════════════════════════ -->
+    <div id="section-simulator">
+      <div class="grid grid-cols-12 gap-6 items-start">
+
+        <!-- Transaction Simulator -->
+        <section class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/15 flex flex-col gap-6">
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center">
+                <span class="material-symbols-outlined text-secondary-fixed">sync_alt</span>
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-primary">Transaction Simulator</h3>
+                <p class="text-xs text-on-surface-variant">Booking with SAVEPOINT &amp; Rollback demos</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 bg-secondary-container text-on-secondary-container text-xs font-bold rounded-full">ACID Compliant</span>
+          </div>
+
+          <!-- Steps -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-surface-container-low p-5 rounded-lg border-l-4 border-secondary">
+              <div class="flex justify-between mb-4">
+                <span class="text-xs font-bold text-primary">Step 1: Initiation</span>
+                <span class="material-symbols-outlined text-sm text-secondary">check_circle</span>
+              </div>
+              <code class="text-xs font-mono text-on-surface-variant block mb-2">BEGIN TRANSACTION;</code>
+              <code class="text-xs font-mono text-on-surface-variant block">UPDATE listings SET status='pending' WHERE id=101;</code>
+            </div>
+            <div class="bg-surface-container-low p-5 rounded-lg border-l-4 border-primary-container">
+              <div class="flex justify-between mb-4">
+                <span class="text-xs font-bold text-primary">Step 2: Checkpoint</span>
+                <span class="material-symbols-outlined text-sm text-on-primary-container">flag</span>
+              </div>
+              <code class="text-xs font-mono text-on-surface-variant block mb-2">SAVEPOINT credit_check;</code>
+              <code class="text-xs font-mono text-on-surface-variant block">INSERT INTO ledger (uid, amt) VALUES (44, -50);</code>
+            </div>
+          </div>
+
+          <!-- Output terminal -->
+          <div id="sim-output" class="terminal rounded-lg p-4 min-h-[100px]">
+            <span class="t-dim">// Run a transaction to see output here...</span>
+          </div>
+
+          <div class="flex gap-3">
+            <button onclick="runTransaction('commit')" class="px-6 py-3 bg-primary-container text-white rounded-lg text-sm font-bold flex-1 hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-sm">check_circle</span> Commit Transaction
+            </button>
+            <button onclick="runTransaction('rollback')" class="px-6 py-3 border border-error text-error rounded-lg text-sm font-bold flex-1 hover:bg-error/5 transition-colors flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-sm">undo</span> Rollback to Savepoint
+            </button>
+          </div>
+        </section>
+
+        <!-- Trigger Test -->
+        <section class="col-span-12 lg:col-span-4 bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/15">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-secondary">bolt</span>
+            </div>
+            <h3 class="text-lg font-bold text-primary">Trigger Test</h3>
+          </div>
+          <div class="space-y-4">
+            <div class="bg-surface-container-high p-4 rounded-lg">
+              <p class="text-xs font-bold text-on-surface mb-2 uppercase tracking-tighter">Constraint: Date Validation</p>
+              <div class="flex items-center gap-2 mb-3">
+                <input id="trigger-date" class="bg-surface-container-lowest border border-outline-variant/20 text-xs rounded-lg p-2 flex-1" type="date" value="2023-01-01"/>
+                <span class="material-symbols-outlined text-error text-sm">warning</span>
+              </div>
+              <div id="trigger-output" class="text-[10px] font-mono text-error p-2 bg-error-container/30 rounded border border-error/20">
+                SQLSTATE[45000]: Rental end date must be after start date.
+              </div>
+            </div>
+            <button onclick="revalidate()" class="w-full py-3 bg-surface-container-highest text-primary font-bold text-sm rounded-lg hover:bg-surface-container-high transition-colors">
+              Re-validate Constraints
+            </button>
+          </div>
+        </section>
+
+        <!-- Concurrency -->
+        <section class="col-span-12 lg:col-span-4 bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/15 relative overflow-hidden">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-lg bg-on-tertiary-container/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-on-tertiary-container">lock</span>
+            </div>
+            <h3 class="text-lg font-bold text-primary">Concurrency</h3>
+          </div>
+          <div class="space-y-3">
+            <div onclick="runLock('select_update')" class="p-3 bg-surface-container rounded flex items-center justify-between group cursor-pointer hover:bg-surface-container-high transition-colors">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings:'FILL' 1;">lock_open</span>
+                <span class="text-xs font-medium text-on-surface">SELECT ... FOR UPDATE</span>
+              </div>
+              <span class="material-symbols-outlined text-xs text-outline opacity-0 group-hover:opacity-100">chevron_right</span>
+            </div>
+            <div onclick="runLock('lock_tables')" class="p-3 bg-surface-container rounded flex items-center justify-between group cursor-pointer hover:bg-surface-container-high transition-colors">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-on-tertiary-container text-sm">lock_person</span>
+                <span class="text-xs font-medium text-on-surface">LOCK TABLES rentals WRITE</span>
+              </div>
+              <span class="material-symbols-outlined text-xs text-outline opacity-0 group-hover:opacity-100">chevron_right</span>
+            </div>
+            <div onclick="runLock('deadlock')" class="p-3 bg-surface-container rounded flex items-center justify-between group cursor-pointer hover:bg-surface-container-high transition-colors border border-on-tertiary-container/20">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-error text-sm">block</span>
+                <span class="text-xs font-medium text-on-surface">Deadlock Detection</span>
+              </div>
+              <span class="material-symbols-outlined text-xs text-outline opacity-0 group-hover:opacity-100">chevron_right</span>
+            </div>
+          </div>
+          <div id="lock-output" class="mt-4 terminal rounded-lg p-3 text-[10px] min-h-[60px]">
+            <span class="t-dim">// Click a lock type to simulate...</span>
+          </div>
+          <div class="mt-6 pt-6 border-t border-outline-variant/10 text-[10px] text-outline uppercase font-bold tracking-widest" id="lock-count">Active Locks: — Nodes</div>
+        </section>
+
+        <!-- Live Query Runner -->
+        <section class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/15 flex flex-col" style="height:420px">
+          <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+                <span class="material-symbols-outlined text-white">code</span>
+              </div>
+              <h3 class="text-lg font-bold text-primary">Live Query Runner</h3>
+            </div>
+            <div class="flex items-center gap-2 bg-surface-container-high px-3 py-1 rounded-full">
+              <span class="w-2 h-2 rounded-full bg-secondary pulse"></span>
+              <span class="text-[10px] font-bold text-on-surface-variant uppercase" id="server-status">Checking…</span>
+            </div>
+          </div>
+          <div class="flex-1 flex flex-col bg-primary-container rounded-lg overflow-hidden">
+            <div class="p-4 border-b border-white/5 h-2/3">
+              <textarea id="sql-editor" class="w-full h-full bg-transparent border-none focus:ring-0 text-secondary-fixed font-mono text-sm resize-none outline-none" spellcheck="false">SELECT p.name, COUNT(r.id) as total_rentals
+FROM products p
+LEFT JOIN rentals r ON p.id = r.product_id
+GROUP BY p.id, p.name
+ORDER BY total_rentals DESC
+LIMIT 5;</textarea>
+            </div>
+            <div id="query-output" class="terminal p-4 h-1/3 overflow-y-auto">
+              <span class="t-dim">// Press Execute Query or Ctrl+Enter to run...</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- System Stats Footer -->
+      <footer class="mt-12 p-8 bg-surface-container rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border border-outline-variant/10">
+        <div class="flex gap-12 flex-wrap">
+          <div>
+            <span class="block text-[10px] text-on-surface-variant font-black uppercase tracking-widest mb-1">DB Engine</span>
+            <span class="text-sm font-bold text-primary">MySQL / PostgreSQL</span>
+          </div>
+          <div>
+            <span class="block text-[10px] text-on-surface-variant font-black uppercase tracking-widest mb-1">Latency</span>
+            <span class="text-sm font-bold text-secondary" id="stat-latency">—</span>
+          </div>
+          <div>
+            <span class="block text-[10px] text-on-surface-variant font-black uppercase tracking-widest mb-1">Transactions</span>
+            <span class="text-sm font-bold text-on-tertiary-container" id="stat-txns">—</span>
+          </div>
+          <div>
+            <span class="block text-[10px] text-on-surface-variant font-black uppercase tracking-widest mb-1">Backend</span>
+            <span class="text-sm font-bold" id="stat-backend">—</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="text-xs text-on-surface-variant italic" id="stat-sync">—</span>
+          <button onclick="refreshStats()" class="w-10 h-10 rounded-full border border-outline-variant/20 flex items-center justify-center hover:bg-surface-container-highest transition-colors">
+            <span class="material-symbols-outlined text-outline">refresh</span>
+          </button>
+        </div>
+      </footer>
+    </div>
+
+  </main>
+
+  <!-- Floating Status Tooltip -->
+  <div class="fixed bottom-8 left-8 p-4 glass-panel border border-white/40 rounded-xl shadow-2xl flex items-center gap-4 z-40 max-w-sm">
+    <div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-primary-container flex items-center justify-center">
+      <span class="material-symbols-outlined text-secondary-fixed">dns</span>
+    </div>
+    <div>
+      <p class="text-xs font-bold text-primary">Spring Boot: localhost:8080</p>
+      <p class="text-[10px] text-on-surface-variant" id="tooltip-status">Checking backend connection…</p>
+    </div>
+  </div>
+
+    <script src="utils.js"></script>
+    <script src="config.js"></script>
+    <script>
+      const user = Auth.require();
+      if (user) document.getElementById('nav-avatar').textContent = user.username.slice(0,2).toUpperCase();
+
+      // ── Sidebar section switcher ──────────────────────────────
+      function setSection(name) {
+        document.querySelectorAll('.nav-item').forEach(el => {
+          el.classList.remove('active');
+          el.classList.add('text-slate-500');
+        });
+        event.currentTarget.classList.add('active');
+        event.currentTarget.classList.remove('text-slate-500');
+      }
+
+      // ── Output helper ─────────────────────────────────────────
+      function renderOutput(elId, obj) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        let html = '';
+        for (const [k, v] of Object.entries(obj)) {
+          const str = typeof v === 'object' ? JSON.stringify(v, null, 2) : String(v);
+          let cls = 't-info';
+          if (str.includes('✅') || str.includes('COMMITTED') || str.includes('success'))  cls = 't-ok';
+          if (str.includes('❌') || str.includes('ERROR'))    cls = 't-err';
+          if (str.includes('↩️') || str.includes('ROLLBACK')) cls = 't-warn';
+          if (str.includes('📍') || str.includes('SAVEPOINT'))cls = 't-info';
+          if (str.includes('🔒') || str.includes('LOCK'))     cls = 't-info';
+          html += `<div class="${cls}">[${k}] ${str}</div>`;
+        }
+        el.innerHTML = html;
+        el.scrollTop = el.scrollHeight;
+      }
+
+      // ── Check backend health ──────────────────────────────────
+      async function checkBackend() {
+        const t0 = performance.now();
+        try {
+          await fetch(`${API_BASE}/products`);
+          const ms = Math.round(performance.now() - t0);
+          document.getElementById('db-status').textContent      = '🟢 Online — ' + ms + 'ms';
+          document.getElementById('server-status').textContent  = 'Server Online';
+          document.getElementById('tooltip-status').textContent = `Connected — ${ms}ms response`;
+          document.getElementById('stat-latency').textContent   = ms + ' ms';
+          document.getElementById('stat-backend').textContent   = 'Spring Boot ✓';
+          document.getElementById('stat-backend').className     = 'text-sm font-bold text-secondary';
+          document.getElementById('stat-sync').textContent      = 'Last synced: just now';
+          document.getElementById('stat-txns').textContent      = 'Live';
+        } catch {
+          document.getElementById('db-status').textContent      = '🔴 Offline';
+          document.getElementById('server-status').textContent  = 'Backend Offline';
+          document.getElementById('tooltip-status').textContent = 'Cannot reach localhost:8080';
+          document.getElementById('stat-latency').textContent   = '—';
+          document.getElementById('stat-backend').textContent   = 'Offline';
+          document.getElementById('stat-backend').className     = 'text-sm font-bold text-error';
+          document.getElementById('stat-sync').textContent      = 'Not connected';
+          document.getElementById('stat-txns').textContent      = '—';
+        }
+      }
+
+      function refreshStats() { checkBackend(); }
+
+      // ── TRANSACTION 1: Rental Booking with SAVEPOINT ──────────
+      // Report Section 5.3.1 Transaction 1
+      // START TRANSACTION → INSERT RENTAL → SAVEPOINT sp1 → INSERT INSURANCE → COMMIT
+      async function runTransaction(type) {
+        const out = document.getElementById('sim-output');
+        out.innerHTML = '<span class="t-dim">Connecting to Spring Boot backend...</span>';
+
+        try {
+          const res  = await fetch(`${API_BASE}/transactions/book-with-transaction`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({
+              productId:     1,
+              renterId:      user.userId,
+              startDate:     '2026-08-01',
+              endDate:       '2026-08-05',
+              withInsurance: type === 'commit',
+              premiumAmt:    50,
+              coverageLimit: 20000
+            })
+          });
+          const data = await res.json();
+          renderOutput('sim-output', data);
+        } catch (e) {
+          out.innerHTML = `<div class="t-err">[ERROR] ${e.message}</div><div class="t-dim">Is Spring Boot running on :8080?</div>`;
+        }
+      }
+
+      // ── TRANSACTION 2: Rollback Demo ──────────────────────────
+      // Report Section 5.3.1 Transaction 2
+      // INSERT User A → SAVEPOINT A → INSERT B → INSERT C → ROLLBACK TO A → COMMIT
+      async function runRollbackDemo() {
+        const out = document.getElementById('sim-output');
+        out.innerHTML = '<span class="t-dim">Running rollback demo...</span>';
+        try {
+          const res  = await fetch(`${API_BASE}/transactions/rollback-demo`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ socId: 1 })
+          });
+          const data = await res.json();
+          renderOutput('sim-output', data);
+        } catch (e) {
+          out.innerHTML = `<div class="t-err">[ERROR] ${e.message}</div>`;
+        }
+      }
+
+      // ── TRANSACTION 3: Update + Partial Rollback ──────────────
+      // Report Section 5.3.1 Transaction 3
+      // UPDATE product1 → SAVEPOINT sp1 → UPDATE product2 → ROLLBACK TO sp1 → COMMIT
+      async function runUpdateRollback() {
+        const out = document.getElementById('sim-output');
+        out.innerHTML = '<span class="t-dim">Running update rollback...</span>';
+        try {
+          const res  = await fetch(`${API_BASE}/transactions/update-rollback`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ productId1: 1, productId2: 2, price1: 1500, price2: 2000 })
+          });
+          const data = await res.json();
+          renderOutput('sim-output', data);
+        } catch (e) {
+          out.innerHTML = `<div class="t-err">[ERROR] ${e.message}</div>`;
+        }
+      }
+
+      // ── TRANSACTION 4: Delete + Full Rollback ─────────────────
+      // Report Section 5.3.1 Transaction 4
+      // DELETE review → ROLLBACK → review restored
+      async function runDeleteRollback() {
+        const out = document.getElementById('sim-output');
+        out.innerHTML = '<span class="t-dim">Running delete rollback...</span>';
+        try {
+          const res  = await fetch(`${API_BASE}/transactions/delete-rollback`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ reviewId: 1 })
+          });
+          const data = await res.json();
+          renderOutput('sim-output', data);
+        } catch (e) {
+          out.innerHTML = `<div class="t-err">[ERROR] ${e.message}</div>`;
+        }
+      }
+
+      // ── TRIGGER TEST: check_valid_dates ───────────────────────
+      // Report Section 3.8
+      // INSERT INTO RENTALS with end_date < start_date
+      // TRIGGER fires: SIGNAL SQLSTATE '45000' "Invalid rental dates"
+      async function revalidate() {
+        const out = document.getElementById('trigger-output');
+        out.textContent = 'Testing trigger...';
+
+        try {
+          const res  = await fetch(`${API_BASE}/transactions/test-trigger`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ productId: 1, renterId: user.userId })
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            out.textContent = '✅ TRIGGER FIRED — Insert rejected: ' + data.triggerMessage;
+            out.className   = 'text-[10px] font-mono text-secondary p-2 bg-secondary-container/30 rounded border border-secondary/20';
+          } else {
+            out.textContent = '⚠️ Trigger did NOT fire — unexpected';
+            out.className   = 'text-[10px] font-mono text-error p-2 bg-error-container/30 rounded border border-error/20';
+          }
+        } catch (e) {
+          out.textContent = '[ERROR] ' + e.message;
+          out.className   = 'text-[10px] font-mono text-error p-2 bg-error-container/30 rounded border border-error/20';
+        }
+      }
+
+      // ── CONCURRENCY: FOR UPDATE Row-Level Lock ────────────────
+      // Report Section 5.3.2.1a
+      // START TRANSACTION → SELECT FOR UPDATE → UPDATE → COMMIT
+      async function runLock(type) {
+        const out = document.getElementById('lock-output');
+        out.innerHTML = '<span class="t-dim">Running concurrency demo...</span>';
+
+        try {
+          let endpoint, body;
+
+          if (type === 'select_update') {
+            // FOR UPDATE row-level lock
+            endpoint = `${API_BASE}/transactions/for-update-lock`;
+            body     = { productId: 1, newPrice: 1200 };
+          } else if (type === 'lock_tables') {
+            // LOCK TABLES WRITE exclusive lock
+            endpoint = `${API_BASE}/transactions/lock-tables`;
+            body     = { productId: 2, newPrice: 1300 };
+          } else if (type === 'deadlock') {
+            // Simulate deadlock scenario with animated steps (no real deadlock endpoint)
+            out.innerHTML = '';
+            const steps = [
+              { cls:'t-info', text:'[TX1] Locks PRODUCTS#1, waiting for RENTALS#5...' },
+              { cls:'t-info', text:'[TX2] Locks RENTALS#5, waiting for PRODUCTS#1...' },
+              { cls:'t-err',  text:'[DEADLOCK] ❌ Circular dependency detected!' },
+              { cls:'t-warn', text:'[ENGINE] MySQL chose TX2 as victim — rolling back TX2' },
+              { cls:'t-ok',   text:'[TX1] Resumed and committed ✅' },
+            ];
+            for (const [i, step] of steps.entries()) {
+              await new Promise(r => setTimeout(r, 400 * i));
+              out.innerHTML += `<div class="${step.cls}">${step.text}</div>`;
+            }
+            return;
+          }
+
+          const res  = await fetch(endpoint, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(body)
+          });
+          const data = await res.json();
+          renderOutput('lock-output', data);
+
+        } catch (e) {
+          out.innerHTML = `<div class="t-err">[ERROR] ${e.message}</div>`;
+        }
+      }
+
+      // ── QUERY RUNNER ──────────────────────────────────────────
+      // Maps preset queries to real backend endpoints
+      const queryMap = {
+        'SELECT COUNT(*) FROM USERS':
+          { url: '/users/count', label: 'COUNT — Section 3.1.1' },
+        'SELECT MAX(price_per_day), AVG(price_per_day), MIN(price_per_day) FROM PRODUCTS':
+          { url: '/products/stats', label: 'MAX/AVG/MIN — Section 3.1.2 & 3.1.3' },
+        'SELECT u.username, p.title FROM USERS u INNER JOIN PRODUCTS p ON u.user_id = p.owner_id':
+          { url: '/products/with-owners', label: 'INNER JOIN — Section 3.4.1' },
+        'SELECT u.username, p.title FROM USERS u LEFT JOIN PRODUCTS p ON u.user_id = p.owner_id':
+          { url: '/products/left-join', label: 'LEFT JOIN — Section 3.4.2' },
+        'SELECT title FROM PRODUCTS WHERE price_per_day > (SELECT AVG(price_per_day) FROM PRODUCTS)':
+          { url: '/products/above-average', label: 'SUBQUERY — Section 3.5' },
+        'SELECT * FROM user_activity':
+          { url: '/rentals/user-activity', label: 'VIEW — Section 3.6' },
+        'SELECT username FROM USERS WHERE user_id IN (SELECT renter_id FROM RENTALS)':
+          { url: '/users/renters', label: 'SET IN — Section 3.3.2' },
+        'SELECT username FROM USERS WHERE user_id NOT IN (SELECT renter_id FROM RENTALS)':
+          { url: '/users/non-renters', label: 'SET NOT IN — Section 3.3.3' },
+        'SELECT username FROM USERS UNION SELECT title FROM PRODUCTS':
+          { url: '/users/union', label: 'UNION — Section 3.3.1' },
+        'SELECT total_rentals_by_user(1)':
+          { url: `/users/${user?.userId || 1}/total-rentals`, label: 'FUNCTION — Section 3.7' },
+      };
+
+      async function executeQuery() {
+        const sql = document.getElementById('sql-editor').value.trim();
+        const out = document.getElementById('query-output');
+        if (!sql) return;
+
+        out.innerHTML = '<span class="t-dim">Executing query via backend...</span>';
+        const t0  = performance.now();
+
+        // Check if we have a mapped endpoint
+        const mapped = queryMap[sql];
+        const url    = mapped
+          ? `${API_BASE}${mapped.url}`
+          : `${API_BASE}/products`; // default fallback
+
+        try {
+          const res  = await fetch(url);
+          const data = await res.json();
+          const ms   = Math.round(performance.now() - t0);
+
+          const label = mapped ? `<div class="t-dim mb-1">// ${mapped.label}</div>` : '';
+          out.innerHTML = `
+            ${label}
+            <div class="t-ok mb-2">&gt;&gt; Executed in ${ms}ms</div>
+            <div class="t-dim">${JSON.stringify(data, null, 2)}</div>
+          `;
+        } catch (e) {
+          out.innerHTML = `<div class="t-err">[ERROR] ${e.message}</div><div class="t-dim">Make sure Spring Boot is running</div>`;
+        }
+      }
+
+      // Fill SQL editor from dropdown click
+      function setQuery(sql) {
+        const editor = document.getElementById('sql-editor');
+        if (editor) { editor.value = sql; executeQuery(); }
+      }
+
+      // Ctrl+Enter to run query
+      document.getElementById('sql-editor').addEventListener('keydown', e => {
+        if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); executeQuery(); }
+      });
+
+      function logout() { Auth.clear(); window.location.href = 'index.html'; }
+
+      // Init
+      checkBackend();
+      setInterval(checkBackend, 30000);
+    </script>
+</body>
+</html>

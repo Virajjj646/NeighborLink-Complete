@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>My Rentals — NeighborLink</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-container": "#1a1f36", "secondary": "#006b58",
+            "surface-variant": "#e0e3e6", "surface": "#f7f9fc",
+            "surface-container": "#eceef1", "on-primary-container": "#8286a2",
+            "on-primary": "#ffffff", "background": "#f7f9fc",
+            "on-surface": "#191c1e", "surface-container-high": "#e6e8eb",
+            "primary": "#03071d", "surface-container-low": "#f2f4f7",
+            "on-secondary-container": "#00725e", "outline-variant": "#c7c5ce",
+            "on-background": "#191c1e", "on-secondary": "#ffffff",
+            "on-surface-variant": "#46464d", "outline": "#77767e",
+            "surface-container-lowest": "#ffffff", "surface-container-highest": "#e0e3e6",
+            "secondary-container": "#5ffbd6", "secondary-fixed-dim": "#38debb",
+            "primary-fixed": "#dde1ff", "on-primary-fixed-variant": "#41455f",
+            "error-container": "#ffdad6", "on-error-container": "#93000a",
+          },
+          borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+          fontFamily: { headline: ["Inter"], body: ["Inter"], label: ["Inter"] }
+        }
+      }
+    }
+  </script>
+  <script src="config.js"></script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .glass-header { backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+    .soul-gradient { background: radial-gradient(circle at 45% 45%, #1a1f36 0%, #03071d 100%); }
+    #review-modal { display: none; }
+    #review-modal.open { display: flex; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+    .animate-slide-up { animation: slideUp 0.25s ease forwards; }
+  </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased min-h-screen overflow-y-auto">
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 w-full z-50 glass-header bg-white/85 border-b border-outline-variant/20">
+    <div class="flex justify-between items-center px-8 h-16 w-full max-w-7xl mx-auto">
+      <div class="flex items-center gap-8">
+        <a href="dashboard.html" class="text-xl font-black tracking-tight text-slate-900">NeighborLink</a>
+        <div class="hidden md:flex items-center gap-6">
+          <a href="browse_listings.html"        class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium">Browse</a>
+          <a href="my_rentals.html"    class="text-teal-600 font-bold border-b-2 border-teal-600 text-sm py-1">Rentals</a>
+          <a href="dashboard.html"     class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium">Activity</a>
+          <a href="dbms_lab.html"      class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium">🧪 DBMS Lab</a>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="create_listing.html" class="soul-gradient text-white px-5 py-2 rounded-xl text-sm font-semibold tracking-wide shadow-lg active:scale-95 duration-100">Post Item</a>
+        <div id="nav-avatar" onclick="logout()" class="w-10 h-10 rounded-full soul-gradient flex items-center justify-center text-white font-bold text-sm cursor-pointer border-2 border-surface-container shadow-sm"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="pt-32 pb-28 px-6 max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <header class="mb-12">
+      <span class="text-secondary text-xs font-bold tracking-[0.05em] uppercase mb-2 block">Management</span>
+      <h1 class="text-on-surface text-5xl font-extrabold tracking-[-0.02em] leading-tight">My Rentals</h1>
+      <p class="text-on-surface-variant text-lg mt-3 max-w-2xl">Track your current borrow history, manage active leases, and provide feedback on your community interactions.</p>
+    </header>
+
+    <!-- Summary Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+      <div class="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/15">
+        <p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant mb-1">Total</p>
+        <p class="text-3xl font-black text-on-surface" id="count-total">—</p>
+      </div>
+      <div class="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/15">
+        <p class="text-[10px] uppercase tracking-widest font-bold text-secondary mb-1">Active</p>
+        <p class="text-3xl font-black text-on-surface" id="count-active">—</p>
+      </div>
+      <div class="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/15">
+        <p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant mb-1">Completed</p>
+        <p class="text-3xl font-black text-on-surface" id="count-completed">—</p>
+      </div>
+      <div class="bg-surface-container-lowest rounded-2xl p-5 border border-error-container/40">
+        <p class="text-[10px] uppercase tracking-widest font-bold text-on-error-container mb-1">Overdue</p>
+        <p class="text-3xl font-black text-on-surface" id="count-overdue">—</p>
+      </div>
+    </div>
+
+    <!-- Table section -->
+    <section class="bg-surface-container-lowest rounded-[24px] overflow-hidden shadow-sm">
+
+      <!-- Filter bar -->
+      <div class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-container-low/50">
+        <div class="relative group max-w-sm w-full">
+          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">search</span>
+          <input id="search-input" oninput="filterTable()" type="text"
+            class="w-full pl-12 pr-4 py-3 bg-surface-container-high rounded-xl text-sm focus:bg-surface-container-lowest focus:ring-0 focus:outline-none border-none transition-all duration-200"
+            placeholder="Search my rentals..."/>
+          <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-secondary group-focus-within:w-full transition-all duration-300"></div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-bold text-on-surface-variant tracking-wider uppercase">Filter Status</span>
+          <select id="status-filter" onchange="filterTable()"
+            class="bg-surface-container-high border-none text-sm font-semibold rounded-xl px-4 py-2 focus:ring-0 cursor-pointer">
+            <option value="">All Statuses</option>
+            <option value="ACTIVE">Active</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="PENDING">Pending</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-surface-container-low border-b border-outline-variant/15">
+              <th class="px-8 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest">Rental ID</th>
+              <th class="px-8 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest">Product</th>
+              <th class="px-8 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest">Owner</th>
+              <th class="px-8 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest">Dates</th>
+              <th class="px-8 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest">Status</th>
+              <th class="px-8 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest">Total</th>
+              <th class="px-8 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest"></th>
+            </tr>
+          </thead>
+          <tbody id="rentals-tbody" class="divide-y divide-outline-variant/10">
+            <tr><td colspan="7" class="px-8 py-16 text-center text-on-surface-variant text-sm">
+              <span class="material-symbols-outlined animate-spin inline-block mr-2 align-middle">progress_activity</span> Loading rentals...
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Review Modal -->
+  <div id="review-modal" class="fixed inset-0 z-[100] items-center justify-center p-6 bg-primary/40 backdrop-blur-sm">
+    <div class="bg-surface-container-lowest w-full max-w-lg rounded-[24px] overflow-hidden shadow-2xl animate-slide-up">
+      <div class="h-2 soul-gradient w-full"></div>
+      <div class="p-8">
+        <div class="flex justify-between items-start mb-6">
+          <div>
+            <h2 class="text-2xl font-extrabold tracking-tight text-on-surface">Leave a Review</h2>
+            <p class="text-sm text-on-surface-variant mt-1" id="modal-subtitle">Share your experience.</p>
+          </div>
+          <button onclick="closeModal()" class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container hover:bg-surface-container-high transition-colors">
+            <span class="material-symbols-outlined text-on-surface">close</span>
+          </button>
+        </div>
+
+        <div id="modal-alert" class="hidden mb-4 p-3 rounded-xl text-sm font-medium"></div>
+
+        <div class="space-y-6">
+          <!-- Star rating -->
+          <div class="space-y-3">
+            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Overall Rating</label>
+            <div class="flex gap-2" id="star-row">
+              <!-- Stars rendered by JS -->
+            </div>
+          </div>
+          <!-- Comment -->
+          <div class="space-y-3">
+            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Your Experience</label>
+            <div class="relative group">
+              <textarea id="review-comment" rows="4"
+                class="w-full bg-surface-container-high border-none rounded-xl p-4 text-sm focus:bg-surface-container-lowest focus:ring-0 focus:outline-none transition-all duration-200 resize-none"
+                placeholder="How was the equipment? Was the pickup easy?"></textarea>
+              <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-secondary group-focus-within:w-full transition-all duration-300"></div>
+            </div>
+          </div>
+          <!-- Actions -->
+          <div class="flex gap-4 pt-4">
+            <button onclick="closeModal()" class="flex-1 px-6 py-3 bg-surface-container hover:bg-surface-container-high text-on-surface font-bold rounded-xl transition-colors active:scale-95 duration-100">Cancel</button>
+            <button id="btn-submit-review" onclick="submitReview()"
+              class="flex-1 px-6 py-3 soul-gradient text-white font-bold rounded-xl shadow-lg active:scale-95 duration-100 flex items-center justify-center gap-2">
+              Submit Review
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 h-20 glass-header bg-white/85 z-50 flex items-center justify-around px-4 border-t border-outline-variant/20">
+    <a href="browse_listings.html"     class="flex flex-col items-center gap-1 text-slate-500"><span class="material-symbols-outlined">explore</span><span class="text-[10px] font-bold uppercase tracking-tighter">Browse</span></a>
+    <a href="my_rentals.html" class="flex flex-col items-center gap-1 text-teal-600"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">receipt_long</span><span class="text-[10px] font-bold uppercase tracking-tighter">Rentals</span></a>
+    <a href="dashboard.html"  class="flex flex-col items-center gap-1 text-slate-500"><span class="material-symbols-outlined">notifications</span><span class="text-[10px] font-bold uppercase tracking-tighter">Activity</span></a>
+    <a href="dbms_lab.html"   class="flex flex-col items-center gap-1 text-slate-500"><span class="material-symbols-outlined">science</span><span class="text-[10px] font-bold uppercase tracking-tighter">DBMS Lab</span></a>
+  </nav>
+
+  <script src="utils.js"></script>
+  <script>
+    const user = Auth.require();
+    if (user) document.getElementById('nav-avatar').textContent = user.username.slice(0,2).toUpperCase();
+
+    // ── State ─────────────────────────────────────────────────
+    let allRentals    = [];
+    let activeRentalId = null;
+    let selectedStars  = 0;
+
+    // Demo fallback data
+    const demoRentals = [
+      { id: 8842, productName: 'Sony A7IV Mirrorless',    ownerName: 'Marcus Chen',      startDate: '2024-10-12', endDate: '2024-10-15', status: 'ACTIVE',     pricePerDay: 1200, reviewed: false,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAJmo8jF01N-S1RxZbmov-JB6jcBYmr3k3TQy7DUWBmewcfWaKRM2jgYOre36ftsNAzqKDASt27Yj5EJAYYex0-aXztzxpn-85eblJrQuYSuXdbnUpcE8jME2P8NAGkSYQZY957YJsOQv6lvqwf-4iihzTYSPKKGp-JbL8FtomBFKqARTMHvBt2s-MPg0TW_v7qlhWjIWIMq1nb6J2xVjN9CJfRzcK_FBxPq2hN9_d70JIsW0e3BiIcDPEIAFzEKiQwb0TXjftVpXe9' },
+      { id: 9021, productName: 'Tandem Kayak 12ft',        ownerName: 'Elena Rodriguez',  startDate: '2024-09-28', endDate: '2024-09-30', status: 'COMPLETED',  pricePerDay: 800,  reviewed: true,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD0hJfBy0rnjOAWS1SQM8-trJt9_8K2QT6KbNZyMifc7I8ykmhEPLqfgMM_CkO9PWpm6bv5tEqEWyJ6HKYDIBxYjWITFkU6pbUV_het0Oetv327Xp-LHfedoy6S0_6u--P_9o3HqWQfPfCl9laevI884Dw9FtSZSlt2-QQCeTkFohTDkpWwhX3pQRj9MEIH1e2vVPgEGIuUrhNrWPVWpJFxlPxODSHntN8PCJo8-6CCkz4brptFTTHbLKMXcvYx-pMttePOklk5P4Vx' },
+      { id: 7734, productName: 'Electric Pressure Washer', ownerName: 'David Smith',      startDate: '2024-10-05', endDate: '2024-10-06', status: 'CANCELLED',  pricePerDay: 500,  reviewed: false,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAibS3I--g1c7ogB8-w7XEwJysAqZ7SiETzwN2HODTCCYDWu815RUkPCV_WcYMWaPXoch5z0UGs3ZoQqbiO-6IUVVEFYZbA2kweytc8UjLRefmBXkII5ZmtF_inWuQ9A4T1q2FAm32Mj62ZQLzzyoDDMe1dzCFih79egJX3Sj3aTLItaQonob_i17o_abVQ4fBN6jbsrC8zHLC4a_YbfTb9T87Xsjm19RAll8a09J143GOmxsAR7_F7LtBpVPAu4gs45JVY6XJLtkQT' },
+    ];
+
+    // ── Status badge ──────────────────────────────────────────
+    function badge(status) {
+      const map = {
+        ACTIVE:    'bg-secondary-container text-on-secondary-container',
+        COMPLETED: 'bg-surface-container-highest text-on-surface-variant',
+        PENDING:   'bg-primary-fixed text-on-primary-fixed-variant',
+        CANCELLED: 'bg-error-container text-on-error-container',
+      };
+      return `<span class="px-3 py-1 text-xs font-bold rounded-full ${map[status] || 'bg-surface-container text-on-surface-variant'}">${status}</span>`;
+    }
+
+    // ── Format dates ──────────────────────────────────────────
+    function fmtDate(d) {
+      if (!d) return '—';
+      return new Date(d).toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+    }
+
+    function calcTotal(r) {
+      if (!r.pricePerDay || !r.startDate || !r.endDate) return '—';
+      const days = Math.max(1, Math.ceil((new Date(r.endDate) - new Date(r.startDate)) / 86400000));
+      return '₹' + (days * r.pricePerDay).toLocaleString('en-IN');
+    }
+
+    // ── Action button per row ─────────────────────────────────
+    function actionBtn(r) {
+      if (r.status === 'ACTIVE')
+        return `<button onclick="cancelRental(${r.id})" class="soul-gradient text-white px-4 py-2 rounded-lg text-xs font-bold hover:opacity-90 transition-opacity">Cancel</button>`;
+      if (r.status === 'COMPLETED' && !r.reviewed)
+        return `<button onclick="openModal(${r.id}, '${(r.ownerName||'').replace(/'/g,"\\'")}', '${(r.productName||'').replace(/'/g,"\\'")}') " class="text-secondary font-bold text-sm hover:underline active:scale-95 transition-transform">Leave Review</button>`;
+      if (r.status === 'COMPLETED' && r.reviewed)
+        return `<span class="text-on-surface-variant font-bold text-sm opacity-50">Reviewed ✓</span>`;
+      return '';
+    }
+
+    // ── Render table ──────────────────────────────────────────
+    function renderTable(data) {
+      const tbody = document.getElementById('rentals-tbody');
+      if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="px-8 py-16 text-center text-on-surface-variant text-sm">No rentals found. <a href="browse_listing.html" class="text-secondary font-bold">Browse items</a> to get started!</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = data.map(r => `
+        <tr class="hover:bg-surface-container-low/30 transition-colors">
+          <td class="px-8 py-6 text-sm font-mono text-on-surface-variant">#NL-${r.id}</td>
+          <td class="px-8 py-6">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
+                ${r.image ? `<img src="${r.image}" alt="${r.productName}" class="w-full h-full object-cover"/>` : `<span class="material-symbols-outlined text-on-surface-variant m-auto block pt-3">inventory_2</span>`}
+              </div>
+              <span class="font-bold text-on-surface">${r.productName || '—'}</span>
+            </div>
+          </td>
+          <td class="px-8 py-6 text-sm text-on-surface">${r.ownerName || '—'}</td>
+          <td class="px-8 py-6 text-sm text-on-surface-variant whitespace-nowrap">${fmtDate(r.startDate)} – ${fmtDate(r.endDate)}</td>
+          <td class="px-8 py-6">${badge(r.status)}</td>
+          <td class="px-8 py-6 text-sm font-bold text-on-surface">${calcTotal(r)}</td>
+          <td class="px-8 py-6 text-right">${actionBtn(r)}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ── Update summary stats ──────────────────────────────────
+    function updateStats(data) {
+      document.getElementById('count-total').textContent     = data.length;
+      document.getElementById('count-active').textContent    = data.filter(r => r.status === 'ACTIVE').length;
+      document.getElementById('count-completed').textContent = data.filter(r => r.status === 'COMPLETED').length;
+      document.getElementById('count-overdue').textContent   = data.filter(r => r.status === 'CANCELLED').length;
+    }
+
+    // ── Filter ────────────────────────────────────────────────
+    function filterTable() {
+      const q      = document.getElementById('search-input').value.toLowerCase();
+      const status = document.getElementById('status-filter').value;
+      const result = allRentals.filter(r => {
+        const matchQ = !q || (r.productName||'').toLowerCase().includes(q) || (r.ownerName||'').toLowerCase().includes(q);
+        const matchS = !status || r.status === status;
+        return matchQ && matchS;
+      });
+      renderTable(result);
+    }
+
+    // ── Load rentals ──────────────────────────────────────────
+    async function loadRentals() {
+      try {
+        // GET /api/rentals/detailed → MULTI JOIN query
+        const res     = await fetch(`${API_BASE}/rentals/detailed`);
+        const detailed = await res.json();
+
+        // Filter to only this user's rentals
+        allRentals = detailed
+          .filter(r => r.renter === user.username)
+          .map(r => ({
+            id:          r.rental_id,
+            productName: r.title,
+            ownerName:   r.owner,
+            startDate:   r.start_date,
+            endDate:     r.end_date,
+            status:      r.status,
+            pricePerDay: null,   // not in join, calcTotal will show —
+            reviewed:    false,
+            image:       null
+          }));
+
+        if (!allRentals.length) allRentals = demoRentals;
+      } catch (e) {
+        console.warn('Rentals load failed', e);
+        allRentals = demoRentals;
+      }
+      updateStats(allRentals);
+      renderTable(allRentals);
+    }
+
+    // ── Cancel rental ─────────────────────────────────────────
+    async function cancelRental(id) {
+      if (!confirm('Are you sure you want to cancel this rental?')) return;
+      try {
+        // PUT /api/rentals/{id}/status → UPDATE RENTALS SET status = 'CANCELLED'
+        const res = await fetch(`${API_BASE}/rentals/${id}/status`, {
+          method:  'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ status: 'CANCELLED' })
+        });
+        if (!res.ok) throw new Error('Failed to cancel');
+        await loadRentals();
+      } catch (err) {
+        alert(err.message || 'Failed to cancel rental.');
+      }
+    }
+
+    // ── Star rating ───────────────────────────────────────────
+    function renderStars(selected) {
+      const row = document.getElementById('star-row');
+      row.innerHTML = [1,2,3,4,5].map(n => `
+        <span class="material-symbols-outlined text-3xl cursor-pointer transition-colors ${n <= selected ? 'text-secondary' : 'text-outline'}"
+          style="${n <= selected ? "font-variation-settings:'FILL' 1;" : ''}"
+          onmouseover="renderStars(${n})"
+          onmouseout="renderStars(${selectedStars})"
+          onclick="setStars(${n})">star</span>
+      `).join('');
+    }
+
+    function setStars(n) { selectedStars = n; renderStars(n); }
+
+    // ── Review modal ──────────────────────────────────────────
+    function openModal(rentalId, ownerName, productName) {
+      activeRentalId = rentalId;
+      selectedStars  = 0;
+      document.getElementById('modal-subtitle').textContent = `Tell us about your experience with ${ownerName} and the ${productName}.`;
+      document.getElementById('review-comment').value = '';
+      document.getElementById('modal-alert').classList.add('hidden');
+      renderStars(0);
+      document.getElementById('review-modal').classList.add('open');
+    }
+
+    function closeModal() { document.getElementById('review-modal').classList.remove('open'); }
+
+    async function submitReview() {
+      const comment = document.getElementById('review-comment').value.trim();
+      const alertEl = document.getElementById('modal-alert');
+
+      if (!selectedStars) {
+        alertEl.textContent = 'Please select a star rating.';
+        alertEl.className   = 'mb-4 p-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200';
+        alertEl.classList.remove('hidden');
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit-review');
+      btn.textContent = 'Submitting…';
+      btn.disabled    = true;
+
+      try {
+        // POST /api/reviews → INSERT INTO REVIEWS (CHECK constraint fires, trust score TRIGGER fires)
+        const res = await fetch(`${API_BASE}/reviews`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            rentalId:   activeRentalId,
+            reviewerId: user.userId,    // ✅ reviewerId not userId
+            rating:     selectedStars,  // ✅ CHECK constraint: 1-5
+            comment:    comment
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to submit review');
+
+        alertEl.textContent = '✅ Review submitted! Trust score updated automatically.';
+        alertEl.className   = 'mb-4 p-3 rounded-xl text-sm font-medium bg-green-50 text-green-700 border border-green-200';
+        alertEl.classList.remove('hidden');
+        setTimeout(() => { closeModal(); loadRentals(); }, 1500);
+
+      } catch (err) {
+        alertEl.textContent = err.message || 'Failed to submit review. Try again.';
+        alertEl.className   = 'mb-4 p-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200';
+        alertEl.classList.remove('hidden');
+      } finally {
+        btn.textContent = 'Submit Review';
+        btn.disabled    = false;
+      }
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('review-modal').addEventListener('click', e => {
+      if (e.target === document.getElementById('review-modal')) closeModal();
+    });
+
+    function logout() { Auth.clear(); window.location.href = 'index.html'; }
+
+    loadRentals();
+  </script>
+</body>
+</html>
